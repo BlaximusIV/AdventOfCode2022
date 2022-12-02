@@ -29,6 +29,18 @@ var OutcomeScores = map[string]int{
 	WIN:  6,
 }
 
+var RequiredOutcome = map[string]string{
+	X: LOSS,
+	Y: TIE,
+	Z: WIN,
+}
+
+var Plays = map[string]string{
+	A: X,
+	B: Y,
+	C: Z,
+}
+
 func main() {
 	content, err := ioutil.ReadFile("PuzzleInput.txt")
 
@@ -39,8 +51,10 @@ func main() {
 	rounds := strings.Split(string(content), "\r\n")
 
 	var roundScores []int
+	var requiredRoundScores []int
 	for _, round := range rounds {
 		roundScores = append(roundScores, calculateRoundScore(round))
+		requiredRoundScores = append(requiredRoundScores, calculateRequiredRoundScore(round))
 	}
 
 	// Part 1
@@ -50,6 +64,14 @@ func main() {
 	}
 
 	fmt.Printf("Total Score: %d \n", sum)
+
+	// Part 2
+	requiredSum := 0
+	for _, score := range requiredRoundScores {
+		requiredSum += score
+	}
+
+	fmt.Printf("Total Required Score: %d \n", requiredSum)
 }
 
 func calculateRoundScore(round string) (score int) {
@@ -62,34 +84,68 @@ func calculateRoundScore(round string) (score int) {
 }
 
 func getOutcome(oppPlay string, myPlay string) (outcome string) {
+	if Plays[oppPlay] == myPlay {
+		outcome = TIE
+		return
+	}
+
 	switch myPlay {
 	case X:
-		switch oppPlay {
-		case A:
-			outcome = TIE
-		case B:
+		if oppPlay == B {
 			outcome = LOSS
-		default:
-			outcome = WIN
 		}
 	case Y:
-		switch oppPlay {
-		case B:
-			outcome = TIE
-		case C:
+		if oppPlay == C {
 			outcome = LOSS
-		default:
-			outcome = WIN
 		}
 	case Z:
-		switch oppPlay {
-		case C:
-			outcome = TIE
-		case A:
+		if oppPlay == A {
 			outcome = LOSS
-		default:
-			outcome = WIN
 		}
+	}
+
+	if outcome == "" {
+		outcome = WIN
+	}
+
+	return
+}
+
+func calculateRequiredRoundScore(round string) (score int) {
+	plan := strings.Split(round, " ")
+
+	oppPlay := plan[0]
+	requiredOutcome := RequiredOutcome[plan[1]]
+
+	myPlay := getRequiredPlay(oppPlay, requiredOutcome)
+
+	score = PlayScores[myPlay] + OutcomeScores[requiredOutcome]
+
+	return
+}
+
+func getRequiredPlay(oppPlay string, requiredOutcome string) (play string) {
+	switch requiredOutcome {
+	case WIN:
+		switch oppPlay {
+		case A:
+			play = Y
+		case B:
+			play = Z
+		case C:
+			play = X
+		}
+	case LOSS:
+		switch oppPlay {
+		case A:
+			play = Z
+		case B:
+			play = X
+		case C:
+			play = Y
+		}
+	case TIE:
+		play = Plays[oppPlay]
 	}
 
 	return

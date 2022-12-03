@@ -16,33 +16,41 @@ func main() {
 
 	rucksacks := strings.Split(string(content), "\r\n")
 
+	// Part 1
 	sum := 0
 	for _, sack := range rucksacks {
-		sum += getSackDuplicatePriority(sack)
+		sum += getDuplicatePocketItemPriority(sack)
 	}
 
-	fmt.Printf("Priorities sum: %d", sum)
+	fmt.Printf("Priorities sum: %d\n", sum)
+
+	// Part 2
+	badgeSum := 0
+	for i := 0; i < len(rucksacks); i += 3 {
+		group := rucksacks[i : i+3]
+		badgeSum += getSacksBadgePriority(group)
+	}
+
+	fmt.Printf("Badge priorities sum: %d\n", badgeSum)
 }
 
-func getSackDuplicatePriority(sack string) (priority int) {
+func getDuplicatePocketItemPriority(sack string) (priority int) {
 	// Find duplicate letter
-	duplicateItem := findDuplicateItem(sack)
-
-	char := []rune(duplicateItem)
+	duplicateItem := findDuplicatePocketItem(sack)
 
 	// Find letter value
-	priority = findLetterValue(char[0])
+	priority = findLetterValue(duplicateItem)
 
 	return
 }
 
-func findDuplicateItem(sack string) (duplicate string) {
+func findDuplicatePocketItem(sack string) (duplicate rune) {
 	pocketSize := len(sack) / 2
 	pocketOne := sack[:pocketSize]
 	pocketTwo := sack[pocketSize:]
 
-	for _, item := range strings.Split(pocketTwo, "") {
-		if strings.Contains(pocketOne, item) {
+	for _, item := range pocketTwo {
+		if strings.Contains(pocketOne, string(item)) {
 			duplicate = item
 			return
 		}
@@ -60,6 +68,29 @@ func findLetterValue(item rune) (value int) {
 		value -= asciiLowerOffset
 	} else {
 		value -= asciiUperOffset
+	}
+
+	return
+}
+
+func getSacksBadgePriority(sacks []string) (priority int) {
+	duplicateItem := findDuplicateSacksItem(sacks)
+
+	priority = findLetterValue(duplicateItem)
+
+	return
+}
+
+func findDuplicateSacksItem(sacks []string) (duplicate rune) {
+	for _, item := range sacks[2] {
+		oneHas := strings.Contains(sacks[0], string(item))
+		twoHas := strings.Contains(sacks[1], string(item))
+
+		if oneHas && twoHas {
+			// Then we know the item is the badge
+			duplicate = item
+			return
+		}
 	}
 
 	return

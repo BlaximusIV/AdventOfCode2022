@@ -67,7 +67,7 @@ func findLetterValue(item rune) (value int) {
 	if value > 95 {
 		value -= asciiLowerOffset
 	} else {
-		value -= asciiUperOffset
+		value -= asciiUpperOffset
 	}
 
 	return

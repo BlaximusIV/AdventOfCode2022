@@ -61,13 +61,13 @@ func findDuplicatePocketItem(sack string) (duplicate rune) {
 
 func findLetterValue(item rune) (value int) {
 	asciiLowerOffset := 96
-	asciiUperOffset := 38
+	asciiUpperOffset := 38
 	value = int(item)
 
 	if value > 95 {
 		value -= asciiLowerOffset
 	} else {
-		value -= asciiUperOffset
+		value -= asciiUpperOffset
 	}
 
 	return

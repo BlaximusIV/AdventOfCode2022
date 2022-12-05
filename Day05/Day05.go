@@ -9,12 +9,6 @@ import (
 
 // To ease input parsing, I'm just manually adding the setup here, and scrubbing the input
 var crates = [][]string{
-	// Test Setup
-	// {"Z", "N"},
-	// {"M", "C", "D"},
-	// {"P"},
-
-	// Actual Setup
 	{"B", "Q", "C"},
 	{"R", "Q", "W", "Z"},
 	{"B", "M", "R", "L", "V"},
@@ -61,21 +55,16 @@ func parseInstructions(content string) {
 func moveCrates() {
 	for _, movements := range instructions {
 		// 0 = count, 1 = from, 2 = to
-		for i := 0; i < movements[0]; i++ {
-			push(pop(movements[1]), movements[2])
-		}
+		items := multiPop(movements[1], movements[0])
+		crates[movements[2]] = append(crates[movements[2]], items...)
 	}
 }
 
-// Stack-like methods, because Go doesn't have a stack type
-func push(item string, crateColumnIndex int) {
-	crates[crateColumnIndex] = append(crates[crateColumnIndex], item)
-}
-
-func pop(crateColumnIndex int) (item string) {
-	itemIndex := len(crates[crateColumnIndex]) - 1
-	item = crates[crateColumnIndex][itemIndex]
-	crates[crateColumnIndex] = crates[crateColumnIndex][:itemIndex]
+func multiPop(crateColumnIndex int, itemCount int) (items []string) {
+	stackLength := len(crates[crateColumnIndex])
+	firstItemIndex := stackLength - itemCount
+	items = crates[crateColumnIndex][firstItemIndex:stackLength]
+	crates[crateColumnIndex] = crates[crateColumnIndex][:firstItemIndex]
 	return
 }
 

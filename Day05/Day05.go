@@ -1,3 +1,8 @@
+/*
+	Part 1 solution was overridden by part 2 solution.
+	It was more in line with just pushing and popping from a stack.
+*/
+
 package main
 
 import (

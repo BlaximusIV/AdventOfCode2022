@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// To ease input parsing, I'm just manually adding the setup here, and scrubbing the input
+// To ease input parsing, I'm just manually adding the setup here and scrubbing the input
 var crates = [][]string{
 	{"B", "Q", "C"},
 	{"R", "Q", "W", "Z"},

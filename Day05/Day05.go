@@ -63,6 +63,7 @@ func moveCrates() {
 func multiPop(crateColumnIndex int, itemCount int) (items []string) {
 	stackLength := len(crates[crateColumnIndex])
 	firstItemIndex := stackLength - itemCount
+
 	items = crates[crateColumnIndex][firstItemIndex:stackLength]
 	crates[crateColumnIndex] = crates[crateColumnIndex][:firstItemIndex]
 	return

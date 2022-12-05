@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -70,7 +71,10 @@ func multiPop(crateColumnIndex int, itemCount int) (items []string) {
 }
 
 func printFinalCrates() {
+	topCrates := ""
 	for _, column := range crates {
-		log.Printf(column[len(column)-1])
+		topCrates = topCrates + column[len(column)-1]
 	}
+
+	fmt.Printf("%v", topCrates)
 }

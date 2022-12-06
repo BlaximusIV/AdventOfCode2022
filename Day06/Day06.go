@@ -24,9 +24,6 @@ func main() {
 		for i := 0; i < messageUniqueCountRequirement; i++ {
 			if strings.Count(characters, string(characters[i])) > 1 {
 				isUnique = false
-			}
-
-			if !isUnique {
 				break
 			}
 		}

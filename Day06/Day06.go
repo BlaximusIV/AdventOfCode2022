@@ -14,21 +14,30 @@ func main() {
 	}
 
 	bufferStream := string(content)
+
+	messageUniqueCountRequirement := 14
 	foundLock := false
 	index := 0
 	for !foundLock {
-		characters := bufferStream[index : index+4]
+		isUnique := true
+		characters := bufferStream[index : index+messageUniqueCountRequirement]
+		for i := 0; i < messageUniqueCountRequirement; i++ {
+			if strings.Count(characters, string(characters[i])) > 1 {
+				isUnique = false
+			}
 
-		if strings.Count(characters, string(characters[0])) == 1 &&
-			strings.Count(characters, string(characters[1])) == 1 &&
-			strings.Count(characters, string(characters[2])) == 1 &&
-			strings.Count(characters, string(characters[3])) == 1 {
+			if !isUnique {
+				break
+			}
+		}
+
+		if isUnique {
 			foundLock = true
-			continue
+			break
 		}
 
 		index++
 	}
 
-	fmt.Printf("Index: %d\n", index+4)
+	fmt.Printf("Index: %d\n", index+messageUniqueCountRequirement)
 }

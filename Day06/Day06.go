@@ -1,3 +1,4 @@
+/* This solution neglects a few error prevention techniques because the data is known ahead of time*/
 package main
 
 import (
@@ -15,26 +16,24 @@ func main() {
 
 	bufferStream := string(content)
 
-	messageUniqueCountRequirement := 14
-	foundLock := false
+	uniqueRequirement := 14
 	index := 0
-	for !foundLock {
+	for {
 		isUnique := true
-		characters := bufferStream[index : index+messageUniqueCountRequirement]
-		for i := 0; i < messageUniqueCountRequirement; i++ {
-			if strings.Count(characters, string(characters[i])) > 1 {
+		characters := bufferStream[index : index+uniqueRequirement]
+		for _, char := range characters {
+			if strings.Count(characters, string(char)) > 1 {
 				isUnique = false
 				break
 			}
 		}
 
 		if isUnique {
-			foundLock = true
 			break
 		}
 
 		index++
 	}
 
-	fmt.Printf("Index: %d\n", index+messageUniqueCountRequirement)
+	fmt.Printf("Processed characters: %d\n", index+uniqueRequirement)
 }

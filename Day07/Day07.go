@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -25,6 +26,7 @@ var TerminalInteractions = []string{}
 var TerminalIndex = 0
 
 // Sizes of directories at or under 100000
+var constrainedDirectorySizes = []int{}
 var directorySizes = []int{}
 
 func main() {
@@ -43,12 +45,22 @@ func main() {
 
 	getDirectorySizes(DirectoryTree)
 
+	// Part 1
 	directorySizeSum := 0
-	for _, size := range directorySizes {
+	for _, size := range constrainedDirectorySizes {
 		directorySizeSum += size
 	}
 
 	log.Printf("Total size of directories: %d\n", directorySizeSum)
+
+	// Part 2
+	sort.Slice(directorySizes, func(i, j int) bool {
+		return directorySizes[i] < directorySizes[j]
+	})
+
+	smallestPossibleDirectorySize := getSmallestPossibleDirectorySize()
+
+	log.Printf("Size of smallest possible directory to delete to free up enough space: %d\n", smallestPossibleDirectorySize)
 }
 
 func executeCommand(command string) {
@@ -136,7 +148,27 @@ func getDirectorySizes(node DirectoryNode) (size int) {
 	}
 
 	if size <= 100000 {
-		directorySizes = append(directorySizes, size)
+		constrainedDirectorySizes = append(constrainedDirectorySizes, size)
+	}
+
+	directorySizes = append(directorySizes, size)
+
+	return
+}
+
+func getSmallestPossibleDirectorySize() (directorySize int) {
+	totalDiskSpace := 70000000
+	updateSize := 30000000
+	usedSpace := directorySizes[len(directorySizes)-1]
+	freeSpace := totalDiskSpace - usedSpace
+	requiredDirectorySize := updateSize - freeSpace
+
+	// There's probably some magic to do this somewhere, but I don't know it yet
+	index := 0
+	for directorySize < requiredDirectorySize {
+		directorySize = directorySizes[index]
+
+		index++
 	}
 
 	return

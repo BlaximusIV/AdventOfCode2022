@@ -22,7 +22,7 @@ type DirectoryNode struct {
 
 var DirectoryTree = DirectoryNode{}
 var CurrentNode = &DirectoryTree
-var TerminalInteractions = []string{}
+var TerminalLines = []string{}
 var TerminalIndex = 0
 
 // Sizes of directories at or under 100000
@@ -37,10 +37,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	TerminalInteractions = strings.Split(string(content), "\r\n")
+	TerminalLines = strings.Split(string(content), "\r\n")
 
-	for TerminalIndex < len(TerminalInteractions) {
-		executeCommand(TerminalInteractions[TerminalIndex])
+	for TerminalIndex < len(TerminalLines) {
+		executeCommand(TerminalLines[TerminalIndex])
 	}
 
 	getDirectorySizes(DirectoryTree)
@@ -79,8 +79,7 @@ func executeCommand(command string) {
 			CurrentNode = getChildNode(parameter)
 			TerminalIndex++
 		}
-		// It's an ls
-	} else {
+	} else /* It's an ls */ {
 		items := getDirectoryItems()
 		populateDirectory(items)
 	}
@@ -89,7 +88,6 @@ func executeCommand(command string) {
 
 func getChildNode(nodeName string) (childNode *DirectoryNode) {
 	for _, node := range CurrentNode.Directories {
-		// Names are unique
 		if node.Name == nodeName {
 			childNode = node
 			break
@@ -103,12 +101,11 @@ func getDirectoryItems() (items []string) {
 	TerminalIndex++
 
 	// append until we get to the next command
-
 	for !isCommandLine() {
-		items = append(items, TerminalInteractions[TerminalIndex])
+		items = append(items, TerminalLines[TerminalIndex])
 		TerminalIndex++
 
-		if TerminalIndex >= len(TerminalInteractions) {
+		if TerminalIndex >= len(TerminalLines) {
 			break
 		}
 	}
@@ -117,7 +114,7 @@ func getDirectoryItems() (items []string) {
 }
 
 func isCommandLine() (isCommandLine bool) {
-	isCommandLine = string(TerminalInteractions[TerminalIndex][0]) == "$"
+	isCommandLine = string(TerminalLines[TerminalIndex][0]) == "$"
 	return
 }
 

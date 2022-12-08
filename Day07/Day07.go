@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type File struct {
@@ -30,6 +31,7 @@ var constrainedDirectorySizes = []int{}
 var directorySizes = []int{}
 
 func main() {
+	start := time.Now()
 	DirectoryTree.Name = "Root"
 
 	content, err := os.ReadFile("PuzzleInput.txt")
@@ -61,6 +63,8 @@ func main() {
 	smallestPossibleDirectorySize := getSmallestPossibleDirectorySize()
 
 	log.Printf("Size of smallest possible directory to delete to free up enough space: %d\n", smallestPossibleDirectorySize)
+	elapsed := time.Since(start)
+	log.Printf("Elapsed Time: %s\n", elapsed)
 }
 
 func executeCommand(command string) {

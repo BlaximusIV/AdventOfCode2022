@@ -50,42 +50,22 @@ func getTailPositionCount(instructionString string, knotCount int) int {
 		case "R":
 			for i := 0; i < magnitude; i++ {
 				knots[0] = coordinate{knots[0].X + 1, knots[0].Y}
-				for j := range knots[1:] {
-					knots[j+1] = getNewPosition(knots[j], knots[j+1])
-					if j+2 >= len(knots) {
-						tailVisitedCoordinates[knots[j+1]]++
-					}
-				}
+				updateKnotPositions(knots, tailVisitedCoordinates)
 			}
 		case "U":
 			for i := 0; i < magnitude; i++ {
 				knots[0] = coordinate{knots[0].X, knots[0].Y + 1}
-				for j := range knots[1:] {
-					knots[j+1] = getNewPosition(knots[j], knots[j+1])
-					if j+2 >= len(knots) {
-						tailVisitedCoordinates[knots[j+1]]++
-					}
-				}
+				updateKnotPositions(knots, tailVisitedCoordinates)
 			}
 		case "D":
 			for i := 0; i < magnitude; i++ {
 				knots[0] = coordinate{knots[0].X, knots[0].Y - 1}
-				for j := range knots[1:] {
-					knots[j+1] = getNewPosition(knots[j], knots[j+1])
-					if j+2 >= len(knots) {
-						tailVisitedCoordinates[knots[j+1]]++
-					}
-				}
+				updateKnotPositions(knots, tailVisitedCoordinates)
 			}
 		case "L":
 			for i := 0; i < magnitude; i++ {
 				knots[0] = coordinate{knots[0].X - 1, knots[0].Y}
-				for j := range knots[1:] {
-					knots[j+1] = getNewPosition(knots[j], knots[j+1])
-					if j+2 >= len(knots) {
-						tailVisitedCoordinates[knots[j+1]]++
-					}
-				}
+				updateKnotPositions(knots, tailVisitedCoordinates)
 			}
 		}
 	}
@@ -139,4 +119,13 @@ func getNewPosition(leader coordinate, follower coordinate) (newCoord coordinate
 
 func difference(a int, b int) int {
 	return int(math.Abs(float64(a - b)))
+}
+
+func updateKnotPositions(knots []coordinate, tailVisitedCoordinates map[coordinate]int) {
+	for j := range knots[1:] {
+		knots[j+1] = getNewPosition(knots[j], knots[j+1])
+		if j+2 >= len(knots) {
+			tailVisitedCoordinates[knots[j+1]]++
+		}
+	}
 }

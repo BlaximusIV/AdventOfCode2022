@@ -17,64 +17,126 @@ func main() {
 	start := time.Now()
 
 	content, _ := os.ReadFile("PuzzleInput.txt")
-
-	tailPositionCount := getTailPositionCount(string(content))
+	contentString := string(content)
 
 	// Part 1
-	log.Printf("Tail in %d unique positions", tailPositionCount)
+	tailPositionCount := getTailPositionCount(contentString, 2)
+	log.Printf("Tail in %d unique positions with two knots", tailPositionCount)
+
+	// Part 2
+	tenKnotTailPositionCount := getTailPositionCount(contentString, 10)
+	log.Printf("Tail in %d unique positions with 10 knots", tenKnotTailPositionCount)
 
 	elapsed := time.Since(start)
 	log.Printf("Elapsed Time: %s\n", elapsed)
 }
 
 // This should probably be split into multiple methods and spaced for readability
-func getTailPositionCount(instructionString string) int {
-	headPosition := coordinate{0, 0}
-	tailPosition := coordinate{0, 0}
+func getTailPositionCount(instructionString string, knotCount int) int {
+	knots := []coordinate{}
+	for i := 0; i < knotCount; i++ {
+		knots = append(knots, coordinate{})
+	}
+
+	// tail's position each tick
 	tailVisitedCoordinates := map[coordinate]int{{0, 0}: 1}
+
 	for _, instruction := range strings.Split(instructionString, "\r\n") {
 		pieces := strings.Split(instruction, " ")
-		// new coord, head coord tail coord
 		direction := pieces[0]
 		magnitude, _ := strconv.Atoi(pieces[1])
+
 		switch direction {
 		case "R":
 			for i := 0; i < magnitude; i++ {
-				newPosition := coordinate{headPosition.X + 1, headPosition.Y}
-				tailPosition = moveTail(newPosition, headPosition, tailPosition, tailVisitedCoordinates)
-				headPosition = newPosition
+				knots[0] = coordinate{knots[0].X + 1, knots[0].Y}
+				for j := range knots[1:] {
+					knots[j+1] = getNewPosition(knots[j], knots[j+1])
+					if j+2 >= len(knots) {
+						tailVisitedCoordinates[knots[j+1]]++
+					}
+				}
 			}
 		case "U":
 			for i := 0; i < magnitude; i++ {
-				newPosition := coordinate{headPosition.X, headPosition.Y + 1}
-				tailPosition = moveTail(newPosition, headPosition, tailPosition, tailVisitedCoordinates)
-				headPosition = newPosition
+				knots[0] = coordinate{knots[0].X, knots[0].Y + 1}
+				for j := range knots[1:] {
+					knots[j+1] = getNewPosition(knots[j], knots[j+1])
+					if j+2 >= len(knots) {
+						tailVisitedCoordinates[knots[j+1]]++
+					}
+				}
 			}
 		case "D":
 			for i := 0; i < magnitude; i++ {
-				newPosition := coordinate{headPosition.X, headPosition.Y - 1}
-				tailPosition = moveTail(newPosition, headPosition, tailPosition, tailVisitedCoordinates)
-				headPosition = newPosition
+				knots[0] = coordinate{knots[0].X, knots[0].Y - 1}
+				for j := range knots[1:] {
+					knots[j+1] = getNewPosition(knots[j], knots[j+1])
+					if j+2 >= len(knots) {
+						tailVisitedCoordinates[knots[j+1]]++
+					}
+				}
 			}
 		case "L":
 			for i := 0; i < magnitude; i++ {
-				newPosition := coordinate{headPosition.X - 1, headPosition.Y}
-				tailPosition = moveTail(newPosition, headPosition, tailPosition, tailVisitedCoordinates)
-				headPosition = newPosition
+				knots[0] = coordinate{knots[0].X - 1, knots[0].Y}
+				for j := range knots[1:] {
+					knots[j+1] = getNewPosition(knots[j], knots[j+1])
+					if j+2 >= len(knots) {
+						tailVisitedCoordinates[knots[j+1]]++
+					}
+				}
 			}
 		}
-
 	}
+
 	return len(tailVisitedCoordinates)
 }
 
-// That's a lot of params. Might be good to split it up somehow
-func moveTail(newPosition coordinate, headPosition coordinate, tailPosition coordinate, visitedCoordinates map[coordinate]int) coordinate {
-	hasMovedTooFar := math.Abs(float64(newPosition.X-tailPosition.X)) > 1 || math.Abs(float64(newPosition.Y-tailPosition.Y)) > 1
-	if hasMovedTooFar {
-		visitedCoordinates[headPosition]++
-		return headPosition
+// There has to be a better way to model the behavior. I don't know what it is though
+func getNewPosition(leader coordinate, follower coordinate) (newCoord coordinate) {
+	xDiff := difference(leader.X, follower.X)
+	yDiff := difference(leader.Y, follower.Y)
+
+	newCoord = follower
+
+	if xDiff > 1 {
+		if leader.X < follower.X {
+			newCoord.X--
+		} else {
+			newCoord.X++
+		}
+
+		if yDiff > 1 {
+			if leader.Y < follower.Y {
+				newCoord.Y--
+			} else {
+				newCoord.Y++
+			}
+		} else if yDiff > 0 {
+			newCoord.Y = leader.Y
+		}
+	} else if yDiff > 1 {
+		if leader.Y < follower.Y {
+			newCoord.Y--
+		} else {
+			newCoord.Y++
+		}
+
+		if xDiff > 1 {
+			if leader.X < follower.X {
+				newCoord.X--
+			} else {
+				newCoord.X++
+			}
+		} else if xDiff > 0 {
+			newCoord.X = leader.X
+		}
 	}
 
-	return tailPosition
+	return
+}
+
+func difference(a int, b int) int {
+	return int(math.Abs(float64(a - b)))
 }

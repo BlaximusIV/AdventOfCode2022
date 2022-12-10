@@ -81,35 +81,15 @@ func getNewPosition(leader coordinate, follower coordinate) (newCoord coordinate
 	newCoord = follower
 
 	if xDiff > 1 {
-		if leader.X < follower.X {
-			newCoord.X--
-		} else {
-			newCoord.X++
-		}
-
-		if yDiff > 1 {
-			if leader.Y < follower.Y {
-				newCoord.Y--
-			} else {
-				newCoord.Y++
-			}
-		} else if yDiff > 0 {
+		newCoord.X = increment(leader.X, newCoord.X)
+		if yDiff == 1 {
 			newCoord.Y = leader.Y
 		}
-	} else if yDiff > 1 {
-		if leader.Y < follower.Y {
-			newCoord.Y--
-		} else {
-			newCoord.Y++
-		}
+	}
 
-		if xDiff > 1 {
-			if leader.X < follower.X {
-				newCoord.X--
-			} else {
-				newCoord.X++
-			}
-		} else if xDiff > 0 {
+	if yDiff > 1 {
+		newCoord.Y = increment(leader.Y, newCoord.Y)
+		if xDiff == 1 {
 			newCoord.X = leader.X
 		}
 	}
@@ -119,4 +99,14 @@ func getNewPosition(leader coordinate, follower coordinate) (newCoord coordinate
 
 func difference(a int, b int) int {
 	return int(math.Abs(float64(a - b)))
+}
+
+func increment(leader int, follower int) (incrementedValue int) {
+	incrementedValue = follower
+	if leader < follower {
+		incrementedValue--
+	} else if leader > follower {
+		incrementedValue++
+	}
+	return
 }

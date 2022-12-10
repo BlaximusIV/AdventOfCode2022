@@ -45,9 +45,9 @@ func getExecutionResults(instructions []string) (signalStrengths []int, crtScree
 			crtRenderRow++
 		}
 
-		characterToDraw := "."
+		characterToDraw := " "
 		if difference(registerX, rowPosition) <= 1 {
-			characterToDraw = "#"
+			characterToDraw = "█"
 		}
 
 		crtScreen[crtRenderRow][rowPosition] = characterToDraw

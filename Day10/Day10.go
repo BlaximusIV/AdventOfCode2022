@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -16,32 +17,41 @@ func main() {
 	content, _ := os.ReadFile("PuzzleInput.txt")
 	instructions := strings.Split(string(content), "\r\n")
 
-	checkedCycles := []int{20, 60, 100, 140, 180, 220}
-	signalStrengths := executeInstructions(instructions, checkedCycles)
+	signalStrengths, crtScreen := getExecutionResults(instructions)
 
 	// Part 1
-	log.Printf("Strengths: %v", signalStrengths)
-	sum := 0
-	for _, val := range signalStrengths {
-		sum += val
-	}
-	log.Printf("Sum of strengths: %d\n", sum)
+	printSummedStrengths(signalStrengths)
+
+	// Part 2
+	drawScreen(crtScreen)
 
 	elapsed := time.Since(start)
 	log.Printf("Elapsed Time: %s\n", elapsed)
 }
 
-func executeInstructions(instructions []string, checkedCycles []int) (signalStrengths []int) {
+// Per puzzle input, crt screen is of fixed size
+func getExecutionResults(instructions []string) (signalStrengths []int, crtScreen [6][40]string) {
 	registerX := 1
 	cycleCount := 1
 	instructionType := ""
 	instructionParam := 0
 	var instructionTtl int
-
+	crtRenderRow := 0
 	for len(instructions) > 0 {
-		if contains(checkedCycles, cycleCount) {
-			signalStrengths = append(signalStrengths, cycleCount*registerX)
+		signalStrengths = append(signalStrengths, cycleCount*registerX)
+
+		rowPosition := (cycleCount - 1) % 40
+		if cycleCount != 1 && rowPosition == 0 {
+			crtRenderRow++
 		}
+
+		characterToDraw := "."
+		if difference(registerX, rowPosition) <= 1 {
+			characterToDraw = "#"
+		}
+
+		crtScreen[crtRenderRow][rowPosition] = characterToDraw
+
 		if instructionTtl < 1 {
 			instructionParts := strings.Split(instructions[0], " ")
 			instructions = instructions[1:]
@@ -62,12 +72,22 @@ func executeInstructions(instructions []string, checkedCycles []int) (signalStre
 	return
 }
 
-func contains(slice []int, target int) (contains bool) {
-	for _, item := range slice {
-		if item == target {
-			contains = true
-			return
-		}
+func difference(a int, b int) int {
+	return int(math.Abs(float64(a - b)))
+}
+
+func printSummedStrengths(strengths []int) {
+	// Specific indexes to check for puzzle solution given in puzzle prompt
+	checkedStrengths := []int{strengths[19], strengths[59], strengths[99], strengths[139], strengths[179], strengths[219]}
+	sum := 0
+	for _, val := range checkedStrengths {
+		sum += val
 	}
-	return
+	log.Printf("Sum of strengths: %d\n", sum)
+}
+
+func drawScreen(crtScreen [6][40]string) {
+	for _, row := range crtScreen {
+		log.Printf("%v\r\n", row)
+	}
 }

@@ -1,3 +1,4 @@
+/*Solution is not currently clean and was left in the state at which the second part of the puzzle was solved*/
 package main
 
 import (
@@ -29,9 +30,9 @@ func main() {
 	content, _ := os.ReadFile("PuzzleInput.txt")
 	monkeyLines := strings.Split(string(content), "\r\n")
 
-	monkeys := populateMonkeys(monkeyLines)
+	monkeys, denominator := populateMonkeys(monkeyLines)
 
-	product := getSimulateMonkeyingProduct(monkeys, 1000)
+	product := getSimulateMonkeyingProduct(monkeys, 10000, denominator)
 
 	// Part 1
 	log.Printf("Product of top two monkey inspector counts: %d", product)
@@ -40,7 +41,8 @@ func main() {
 	log.Printf("Elapsed Time: %s\n", elapsed)
 }
 
-func populateMonkeys(monkeyLines []string) (monkeys []Monkey) {
+func populateMonkeys(monkeyLines []string) (monkeys []Monkey, commonTestDenominator int) {
+	commonTestDenominator = 1
 	for i := 0; i < len(monkeyLines); i += 7 {
 		monkeyBlock := 7
 		if i+monkeyBlock >= len(monkeyLines) {
@@ -48,6 +50,7 @@ func populateMonkeys(monkeyLines []string) (monkeys []Monkey) {
 		}
 
 		monkey := makeMonkey(monkeyLines[i : i+monkeyBlock])
+		commonTestDenominator *= monkey.TestMagnitude
 		monkeys = append(monkeys, monkey)
 	}
 
@@ -81,7 +84,7 @@ func makeMonkey(monkeyLines []string) (monkey Monkey) {
 	return
 }
 
-func getSimulateMonkeyingProduct(monkeys []Monkey, iterationCount int) (busyMonkeyProduct int) {
+func getSimulateMonkeyingProduct(monkeys []Monkey, iterationCount int, commonTestDenominator int) (busyMonkeyProduct int) {
 	for i := 0; i < iterationCount; i++ {
 		for j, monkey := range monkeys {
 			for _, item := range monkeys[j].Items {
@@ -99,7 +102,7 @@ func getSimulateMonkeyingProduct(monkeys []Monkey, iterationCount int) (busyMonk
 					newWorryLevel += magnitude
 				}
 
-				// newWorryLevel = int(math.Floor(float64(newWorryLevel) / 3))
+				newWorryLevel = newWorryLevel % commonTestDenominator // int(math.Floor(float64(newWorryLevel) / 3))
 
 				if newWorryLevel%monkey.TestMagnitude == 0 {
 					monkeys[monkey.PassMonkey].Items = append(monkeys[monkey.PassMonkey].Items, newWorryLevel)

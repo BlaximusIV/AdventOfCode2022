@@ -17,29 +17,37 @@ func main() {
 
 	content, _ := os.ReadFile("PuzzleInput.txt")
 
-	var rockMap [200][600]string
-	populateMap(&rockMap, string(content))
-
-	placedSandBlocks := simulateSandFall(rockMap)
-
 	// Part 1
+	rockMap, _ := populateMap(string(content))
+	placedSandBlocks := simulateSandFall(rockMap)
 	log.Printf("Placed sand blocks: %d\n", placedSandBlocks)
+
+	// Part 2
+	rockMap, ledgeDepth := populateMap(string(content))
+	drawFloor(&rockMap, ledgeDepth)
+	placedSandBlocks = simulateSandFall(rockMap)
+
+	log.Printf("Placed sand blocks with floor: %d\n", placedSandBlocks)
 
 	elapsed := time.Since(startTime)
 	log.Printf("Elapsed Time: %s\n", elapsed)
 }
 
-func populateMap(rockMap *[200][600]string, scan string) {
+func populateMap(scan string) (rockMap [200][1200]string, ledgeDepth int) {
 	ledges := strings.Split(scan, "\r\n")
 	for _, ledge := range ledges {
 		directions := strings.Split(ledge, " -> ")
 		for i := 0; i < len(directions)-1; i++ {
-			drawEdge(rockMap, getPoint(directions[i]), getPoint(directions[i+1]))
+			a, b := getPoint(directions[i]), getPoint(directions[i+1])
+			drawEdge(&rockMap, a, b)
+			ledgeDepth = getMax(a.Y, b.Y, ledgeDepth)
 		}
 	}
+
+	return
 }
 
-func drawEdge(rockMap *[200][600]string, a Point, b Point) {
+func drawEdge(rockMap *[200][1200]string, a Point, b Point) {
 	rockMap[a.Y][a.X] = "#"
 	for a != b {
 		// transform
@@ -64,28 +72,53 @@ func getPoint(point string) Point {
 	return Point{y, x}
 }
 
-func simulateSandFall(rockMap [200][600]string) int {
-	blockPositions := []Point{}
+func getMax(a, b, c int) int {
+	max := a
+
+	if b > max {
+		max = b
+	}
+
+	if c > max {
+		max = c
+	}
+
+	return max
+}
+
+func drawFloor(rockMap *[200][1200]string, ledgeDepth int) {
+	floorDepth := ledgeDepth + 2
+	for i := range rockMap[floorDepth] {
+		rockMap[floorDepth][i] = "#"
+	}
+}
+
+func simulateSandFall(rockMap [200][1200]string) (sandBlocks int) {
 	// place block
 	spawnPoint := Point{0, 500}
 	simulate := true
 	for simulate {
-		cont, location := placeBlock(&rockMap, spawnPoint)
-		simulate = cont
-		if cont {
-			blockPositions = append(blockPositions, location)
+		simulate = placeBlock(&rockMap, spawnPoint)
+
+		if simulate {
+			sandBlocks++
 		}
 	}
 
-	return len(blockPositions)
+	return
 }
 
-func placeBlock(rockMap *[200][600]string, location Point) (bool, Point) {
+func placeBlock(rockMap *[200][1200]string, location Point) bool {
+	// The pile has reached the ceiling hole
+	if rockMap[location.Y][location.X] == "O" {
+		return false
+	}
+
 	sandCanMove := true
 	for sandCanMove {
 		// It's running into the abyss
 		if location.Y+1 >= len(rockMap) {
-			return false, location
+			return false
 		}
 
 		// If it can move down
@@ -108,10 +141,9 @@ func placeBlock(rockMap *[200][600]string, location Point) (bool, Point) {
 			continue
 		}
 
-		// Time to settle a new grain
 		rockMap[location.Y][location.X] = "O"
 		sandCanMove = false
 	}
 
-	return true, location
+	return true
 }

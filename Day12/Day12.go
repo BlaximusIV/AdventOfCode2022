@@ -24,6 +24,21 @@ func main() {
 	// Part 1
 	log.Printf("Length of the shortest path to target from current location: %d\n", shortestPathLength)
 
+	// Part 2
+	// We're gonna brute-force this cause it'll be easy and I need to move on to other things
+	minIdealPathLength := shortestPathLength
+	aCoordinates := getACoordinates(grid)
+	for _, coord := range aCoordinates {
+		pathLength := getShortestPathLength(grid, coord, goal)
+		if pathLength == 0 {
+			continue
+		} else if pathLength < minIdealPathLength {
+			minIdealPathLength = pathLength
+		}
+	}
+
+	log.Printf("Length of the shortest path to target from ideal location: %d\n", minIdealPathLength)
+
 	elapsed := time.Since(start)
 	log.Printf("Elapsed Time: %s\n", elapsed)
 }
@@ -66,7 +81,7 @@ func getShortestPathLength(grid Grid, start Coordinate, goal Coordinate) (shorte
 			break
 		}
 
-		for _, c := range grid.neighbors(current) {
+		for _, c := range grid.Neighbors(current) {
 			newCost := costSoFar[current] + 1
 			_, exists := costSoFar[c]
 			if !exists || newCost < costSoFar[c] {
@@ -83,11 +98,28 @@ func getShortestPathLength(grid Grid, start Coordinate, goal Coordinate) (shorte
 }
 
 func getRoute(vistedLocations map[Coordinate]Coordinate, start Coordinate, goal Coordinate) (path []Coordinate) {
+	_, exists := vistedLocations[goal]
+	if !exists {
+		return
+	}
+
 	current := goal
 
 	for current != start {
 		path = append(path, current)
 		current = vistedLocations[current]
+	}
+
+	return
+}
+
+func getACoordinates(grid Grid) (coordinates []Coordinate) {
+	for i := range grid.RegionMap {
+		for j := range grid.RegionMap[i] {
+			if grid.RegionMap[i][j] == "a" {
+				coordinates = append(coordinates, Coordinate{i, j})
+			}
+		}
 	}
 
 	return

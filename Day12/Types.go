@@ -17,12 +17,10 @@ func (g Grid) InBounds(coord Coordinate) bool {
 }
 
 func (g Grid) Passable(current Coordinate, destination Coordinate) bool {
-	currentVal := g.RegionMap[current.Y][current.X]
-	destVal := g.RegionMap[destination.Y][destination.X]
-	return g.Elevations[destVal]-g.Elevations[currentVal] <= 1
+	return g.GetElevation(destination)-g.GetElevation(current) <= 1
 }
 
-func (g Grid) neighbors(current Coordinate) (neighbors []Coordinate) {
+func (g Grid) Neighbors(current Coordinate) (neighbors []Coordinate) {
 	n := []Coordinate{{current.Y + 1, current.X}, {current.Y - 1, current.X}, {current.Y, current.X - 1}, {current.Y, current.X + 1}}
 
 	for _, val := range n {
@@ -32,6 +30,10 @@ func (g Grid) neighbors(current Coordinate) (neighbors []Coordinate) {
 	}
 
 	return
+}
+
+func (g Grid) GetElevation(c Coordinate) int {
+	return g.Elevations[g.RegionMap[c.Y][c.X]]
 }
 
 type PriorityItem struct {

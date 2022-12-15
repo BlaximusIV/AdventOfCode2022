@@ -8,6 +8,22 @@ import (
 	"time"
 )
 
+type Utf8Numbers struct {
+	Values []int
+}
+
+func (a Utf8Numbers) Contains(char byte) bool {
+	for _, val := range a.Values {
+		if val == int(char) {
+			return true
+		}
+	}
+	return false
+}
+
+// The utf8 codes representing the numbers 0-9. Directly comparable to bytes
+var utf8Numbers = Utf8Numbers{[]int{48, 49, 50, 51, 52, 53, 54, 55, 56, 57}}
+
 func main() {
 	startTime := time.Now()
 
@@ -34,38 +50,61 @@ func getCorrectOrderedPairsSum(pairs []string) (sum int) {
 }
 
 func isCorrectOrder(lhs string, rhs string) bool {
-	index := 0
+	// Separate index
+	lhIndex := 0
+	rhIndex := 0
 	for {
-		lchar, rchar := string(lhs[index]), string(rhs[index])
-
+		// TODO: Get numbers up front
+		lchar, rchar := lhs[lhIndex], rhs[rhIndex]
+		lstr, rstr := string(lchar), string(rchar)
 		// If they're the same
 		if lchar == rchar {
-			index++
+			lhIndex++
+			rhIndex++
 			continue
 		}
 
 		// They're both numbers
-		lhNum, lerr := strconv.Atoi(string(lchar))
-		rhNum, rerr := strconv.Atoi(string(rchar))
-		if lerr == nil && rerr == nil {
-			return lhNum < rhNum
+		lisNum := utf8Numbers.Contains(lchar)
+		risNum := utf8Numbers.Contains(rchar)
+		if lisNum && risNum {
+			lNumString := ""
+			rNumString := ""
+
+			// Get whole numbers
+			for utf8Numbers.Contains(lhs[lhIndex]) {
+				lNumString += string(lhs[lhIndex])
+				lhIndex++
+			}
+
+			for utf8Numbers.Contains(rhs[rhIndex]) {
+				rNumString += string(rhs[rhIndex])
+				rhIndex++
+			}
+
+			lNum, _ := strconv.Atoi(lNumString)
+			rNum, _ := strconv.Atoi(rNumString)
+
+			return lNum < rNum
 		}
 
-		// "[", ","
-		if lchar == "]" || rchar == "]" {
-			return lchar == "]"
+		// '[', ','
+		if lchar == ']' || rchar == ']' {
+			return lchar == ']'
 		}
 
 		// One is a number
-		if rchar == "[" {
-			lhs = lhs[:index] + "[" + string(lhs[index]) + "]" + lhs[index+1:]
-			index++
+		if rchar == '[' {
+			lhs = lhs[:lhIndex] + "[" + lstr + "]" + lhs[lhIndex+1:]
+			lhIndex++
+			rhIndex++
 			continue
-		} else if lchar == "[" {
-			rhs = rhs[:index] + "[" + string(rhs[index]) + "]" + rhs[index+1:]
-			index++
+		} else if lchar == '[' {
+			rhs = rhs[:rhIndex] + "[" + rstr + "]" + rhs[rhIndex+1:]
+			lhIndex++
+			rhIndex++
 			continue
-		} else if lerr == nil {
+		} else if lisNum {
 			return false
 		} else {
 			return true

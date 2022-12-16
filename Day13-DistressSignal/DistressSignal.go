@@ -57,17 +57,21 @@ func isCorrectOrder(lhs string, rhs string) bool {
 		// TODO: Get numbers up front
 		lchar, rchar := lhs[lhIndex], rhs[rhIndex]
 		lstr, rstr := string(lchar), string(rchar)
-		// If they're the same
-		if lchar == rchar {
+
+		lisNum := utf8Numbers.Contains(lchar)
+		risNum := utf8Numbers.Contains(rchar)
+
+		areBothNumbers := lisNum && risNum
+		// If they're the same and not numbers..?
+		if lchar == rchar && areBothNumbers {
 			lhIndex++
 			rhIndex++
 			continue
 		}
 
 		// They're both numbers
-		lisNum := utf8Numbers.Contains(lchar)
-		risNum := utf8Numbers.Contains(rchar)
-		if lisNum && risNum {
+
+		if areBothNumbers {
 			lNumString := ""
 			rNumString := ""
 

@@ -81,7 +81,6 @@ func extractPair(rawVals []string) SensorPair {
 }
 
 func findMissingBeaconFrequency(sensors []SensorPair) int {
-	// For 0..4000000
 	rangeMin := 0
 	rangeMax := 4000000
 	targetPoint := Point{0, 0}

@@ -1,3 +1,4 @@
+/*Gross solution. Needs refactoring.*/
 package main
 
 import (
@@ -34,8 +35,52 @@ func main() {
 	correctSum := getCorrectOrderedPairsSum(pairs)
 	log.Printf("Sum of pair indexes in correct order: %d", correctSum)
 
+	// Part 2
+	lines := getPackets(pairs)
+	lines = append(lines, "[[2]]", "[[6]]")
+
+	sort(lines)
+	decoderKey := getDecoderKey(lines)
+
+	log.Printf("Decoder Key: %d", decoderKey)
+
 	elapsed := time.Since(startTime)
 	log.Printf("Elapsed Time: %s\n", &elapsed)
+}
+
+func getPackets(pairs []string) (packets []string) {
+	packets = []string{}
+	for _, pair := range pairs {
+		packets = append(packets, strings.Split(pair, "\r\n")...)
+	}
+	return
+}
+
+func sort(packets []string) {
+	// The dataset is small, bubble sort it is!
+	for i := 0; i < len(packets)-1; i++ {
+		for j := i + 1; j < len(packets); j++ {
+			if !isCorrectOrder(packets[i], packets[j]) {
+				temp := packets[i]
+				packets[i] = packets[j]
+				packets[j] = temp
+			}
+		}
+	}
+}
+
+func getDecoderKey(packets []string) int {
+	dividerPackets := [2]int{}
+
+	for i, val := range packets {
+		if val == "[[2]]" {
+			dividerPackets[0] = i
+		} else if val == "[[6]]" {
+			dividerPackets[1] = i
+		}
+	}
+
+	return (dividerPackets[0] + 1) * (dividerPackets[1] + 1)
 }
 
 func getCorrectOrderedPairsSum(pairs []string) (sum int) {

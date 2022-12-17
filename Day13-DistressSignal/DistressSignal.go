@@ -49,45 +49,54 @@ func getCorrectOrderedPairsSum(pairs []string) (sum int) {
 	return
 }
 
+// Ugly as sin brute force comparison, but it works
 func isCorrectOrder(lhs string, rhs string) bool {
 	// Separate index
 	lhIndex := 0
 	rhIndex := 0
 	for {
-		// TODO: Get numbers up front
 		lchar, rchar := lhs[lhIndex], rhs[rhIndex]
 		lstr, rstr := string(lchar), string(rchar)
 
 		lisNum := utf8Numbers.Contains(lchar)
 		risNum := utf8Numbers.Contains(rchar)
 
+		if lisNum {
+			for utf8Numbers.Contains(lhs[lhIndex+1]) {
+				lstr += string(lhs[lhIndex+1])
+				lhIndex++
+			}
+
+		}
+
+		if risNum {
+			for utf8Numbers.Contains(rhs[rhIndex+1]) {
+				rstr += string(rhs[rhIndex+1])
+				rhIndex++
+			}
+		}
+
 		areBothNumbers := lisNum && risNum
-		// If they're the same and not numbers..?
-		if lchar == rchar && areBothNumbers {
+		if lchar == rchar && !areBothNumbers {
 			lhIndex++
 			rhIndex++
 			continue
 		}
 
 		// They're both numbers
-
 		if areBothNumbers {
-			lNumString := ""
-			rNumString := ""
 
-			// Get whole numbers
-			for utf8Numbers.Contains(lhs[lhIndex]) {
-				lNumString += string(lhs[lhIndex])
-				lhIndex++
+			lNum, _ := strconv.Atoi(lstr)
+			rNum, _ := strconv.Atoi(rstr)
+
+			if lNum == rNum {
+				atEnd := lhIndex+1 >= len(lhs) || rhIndex+1 >= len(rhs)
+				if !atEnd {
+					lhIndex++
+					rhIndex++
+				}
+				continue
 			}
-
-			for utf8Numbers.Contains(rhs[rhIndex]) {
-				rNumString += string(rhs[rhIndex])
-				rhIndex++
-			}
-
-			lNum, _ := strconv.Atoi(lNumString)
-			rNum, _ := strconv.Atoi(rNumString)
 
 			return lNum < rNum
 		}
@@ -99,14 +108,16 @@ func isCorrectOrder(lhs string, rhs string) bool {
 
 		// One is a number
 		if rchar == '[' {
-			lhs = lhs[:lhIndex] + "[" + lstr + "]" + lhs[lhIndex+1:]
-			lhIndex++
+			diff := len(lstr) - 1
+			lhs = lhs[:lhIndex-diff] + "[" + lstr + "]" + lhs[lhIndex+1:]
+			lhIndex += 1 - diff
 			rhIndex++
 			continue
 		} else if lchar == '[' {
-			rhs = rhs[:rhIndex] + "[" + rstr + "]" + rhs[rhIndex+1:]
+			diff := len(rstr) - 1
+			rhs = rhs[:rhIndex-diff] + "[" + rstr + "]" + rhs[rhIndex+1:]
 			lhIndex++
-			rhIndex++
+			rhIndex += 1 - diff
 			continue
 		} else if lisNum {
 			return false

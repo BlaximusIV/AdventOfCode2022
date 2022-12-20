@@ -54,12 +54,17 @@ type Point struct {
 func main() {
 	startTime := time.Now()
 
-	content, _ := os.ReadFile("Input.txt")
+	content, _ := os.ReadFile("TestInput.txt")
 
 	// Part1
 	iterations := 2022
 	towerHeight := getSimulatedTowerHeight(string(content), iterations)
+	log.Printf("The tower is %d blocks tall \n", towerHeight)
 
+	// Part2
+	// One Trillion, find the cycle
+	iterations = 1_000_000_000_000
+	towerHeight = getSimulatedTowerHeight(string(content), iterations)
 	log.Printf("The tower is %d blocks tall \n", towerHeight)
 
 	elapsed := time.Since(startTime)
@@ -68,7 +73,6 @@ func main() {
 
 func getSimulatedTowerHeight(directions string, iterations int) int {
 	// the simulated chamber
-
 	chamber := [][7]string{NewRow, NewRow, NewRow}
 	directionIndex := 0
 	for i := 0; i < iterations; i++ {
@@ -113,6 +117,16 @@ func getSimulatedTowerHeight(directions string, iterations int) int {
 	return len(chamber) - findHighestBlock(chamber)
 }
 
+// TODO: GET STATE, compare state in rabbit / hare,
+func getState(chamber [][7]string) [][7]string {
+	for i := 0; i < len(chamber[0]); i++ {
+		found := false
+		for !found {
+			chamber
+		}
+	}
+}
+
 func insertRows(chamber *[][7]string, rowCount int) {
 	tempSlice := [][7]string{}
 	for i := 0; i < rowCount; i++ {
@@ -140,7 +154,7 @@ func spawnBlock(iterationCount int) Block {
 		}
 	case iterationCount%5 == 3:
 		{
-			// I
+			// |
 			return Block{[]Point{{0, 2}, {1, 2}, {2, 2}, {3, 2}}}
 		}
 	case iterationCount%5 == 4:

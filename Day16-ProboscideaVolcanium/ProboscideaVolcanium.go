@@ -9,26 +9,17 @@ import (
 	"time"
 )
 
-type Node struct {
-	Name     string
-	FlowRate int
-	Edges    []string
-}
-
-type Path struct {
-	Visited   []string
-	TTL       int
-	TotalFlow int
-}
-
 func main() {
 	startTime := time.Now()
 
-	content, _ := os.ReadFile("TestInput.txt")
+	content, _ := os.ReadFile("Input.txt")
 	graph := getGraph(string(content))
 
+	// Precompile path lengths
+	shortestPaths := getShortestPaths(graph)
+
 	// Part 1
-	greatestFlow := getGreatestPathsFlow(graph["AA"], graph, []string{}, map[string]bool{}, 30, 0, 0)
+	greatestFlow := getGreatestPathsFlow(graph, shortestPaths)
 	log.Printf("Greatest possible flow: %v\n", greatestFlow)
 
 	elapsed := time.Since(startTime)
@@ -51,77 +42,136 @@ func getGraph(input string) (graph map[string]Node) {
 	return
 }
 
-func getGreatestPathsFlow(current Node,
-	graph map[string]Node,
-	path []string,
-	activated map[string]bool,
-	ttl int,
-	currentFlowRate int,
-	currentFlowTotal int) int {
+func getShortestPaths(g map[string]Node) (paths map[string]int) {
+	paths = map[string]int{}
 
-	currentFlowTotal += currentFlowRate
-	if ttl <= 0 {
-		return currentFlowTotal
+	for key := range g {
+		for key2 := range g {
+			if key == key2 {
+				continue
+			}
+
+			findShortestPath(key, key2, g, paths)
+		}
 	}
 
-	path = append(path, current.Name)
+	return
+}
 
-	_, exists := activated[current.Name]
-	if !exists {
-		activated[current.Name] = false
+func getPathName(origin, destination string) string {
+	return origin + " -> " + destination
+}
+
+func findShortestPath(origin, destination string, graph map[string]Node, paths map[string]int) {
+	// If we've already calculated it from the other direction, set it up and continue
+	oppPath, ok := paths[getPathName(destination, origin)]
+	pathName := getPathName(origin, destination)
+	if ok {
+		paths[pathName] = oppPath
+		return
 	}
 
-	greatestFlow := 0
-	canActivate := current.FlowRate > 0 && ttl > 1 && !activated[current.Name]
-	if canActivate {
-		newActivate := activated
-		newActivate[current.Name] = true
-		for _, node := range current.Edges {
-			newRate := currentFlowRate + graph[node].FlowRate
-			pathFlow := getGreatestPathsFlow(graph[node], graph, path, newActivate, ttl-2, newRate, currentFlowTotal+currentFlowRate)
-			if greatestFlow < pathFlow {
-				greatestFlow = pathFlow
+	frontier := PriorityQueue{}
+	frontier.Enqueue(PriorityItem{0, graph[origin]})
+	visited := map[string]string{}
+	costSoFar := map[string]int{origin: 0}
+
+	for len(frontier.Vals) > 0 {
+		current := frontier.Dequeue()
+		if current.Name == destination {
+			break
+		}
+
+		for _, c := range graph[current.Name].Edges {
+			newCost := costSoFar[current.Name] + 1
+			_, exists := costSoFar[c]
+			if !exists || newCost < costSoFar[c] {
+				costSoFar[c] = newCost
+				frontier.Enqueue(PriorityItem{newCost, graph[c]})
+				visited[c] = current.Name
 			}
 		}
 	}
-	for _, node := range current.Edges {
-		pathFlow := getGreatestPathsFlow(graph[node], graph, path, activated, ttl-1, currentFlowRate, currentFlowTotal)
-		if greatestFlow < pathFlow {
-			greatestFlow = pathFlow
+
+	path := getRoute(visited, origin, destination)
+
+	paths[pathName] = len(path)
+}
+
+func getRoute(visited map[string]string, origin, destination string) (path []string) {
+	_, exists := visited[destination]
+	if !exists {
+		return
+	}
+
+	current := destination
+
+	for current != origin {
+		path = append(path, current)
+		current = visited[current]
+	}
+
+	return
+}
+
+func getGreatestPathsFlow(graph map[string]Node, paths map[string]int) int {
+	releasable := getReleasableValves(graph)
+
+	greatestPathFlow := getGreatestPath(graph, paths, releasable, "AA", 30, 0)
+
+	return greatestPathFlow
+}
+
+func getGreatestPath(
+	graph map[string]Node,
+	paths map[string]int,
+	targets map[string]bool,
+	current string,
+	ttl,
+	score int) int {
+
+	if ttl <= 0 {
+		return score
+	}
+
+	maxScore := 0
+	for key, val := range targets {
+		path := getPathName(current, key)
+		// time to travel, along with time to activate
+		activationCost := paths[path] + 1
+		if !val && activationCost < ttl {
+			copy := copyMap(targets)
+			copy[key] = true
+			newTtl := ttl - activationCost
+			newScore := newTtl * graph[key].FlowRate
+			resultScore := getGreatestPath(graph, paths, copy, key, newTtl, newScore)
+
+			if resultScore > maxScore {
+				maxScore = resultScore
+			}
 		}
 	}
 
-	return greatestFlow
+	return score + maxScore
 }
 
-// func getPaths(current Node, p Path, graph map[string]Node) []Path {
-// 	// Update visited
-// 	_, exists := p.Visited[current.Name]
-// 	if !exists {
-// 		p.Visited[current.Name] = false
-// 	}
+func getReleasableValves(graph map[string]Node) map[string]bool {
+	releasable := map[string]bool{}
+	for key, val := range graph {
+		if val.FlowRate > 0 {
+			releasable[key] = false
+		}
+	}
 
-// 	// If no more ttl return path array with single path
-// 	paths := []Path{}
-// 	if p.TTL == 0 {
-// 		paths = append(paths, p)
-// 		return paths
-// 	}
+	return releasable
+}
 
-// 	canActivate := graph[current.Name].FlowRate > 0 && p.TTL > 1 && !p.Visited[current.Name]
-// 	for _, node := range graph[current.Name].Edges {
-// 		if canActivate {
-// 			activatePath := p
-// 			activatePath.Visited[current.Name] = true
-// 			activatePath.TTL -= 2
-// 			activatePath.TotalFlow = activatePath.TTL * graph[current.Name].FlowRate
+func copyMap(m map[string]bool) (copy map[string]bool) {
+	copy = map[string]bool{}
 
-// 			paths = append(paths, getPaths(graph[node], activatePath, graph)...)
-// 		}
+	for key, val := range m {
+		copy[key] = val
+	}
 
-// 		p.TTL--
-// 		paths = append(paths, getPaths(graph[node], p, graph)...)
-// 	}
-
-// 	return paths
-// }
+	return
+}

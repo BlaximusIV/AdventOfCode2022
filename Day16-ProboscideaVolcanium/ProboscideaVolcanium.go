@@ -19,8 +19,12 @@ func main() {
 	shortestPaths := getShortestPaths(graph)
 
 	// Part 1
-	greatestFlow := getGreatestPathsFlow(graph, shortestPaths)
+	greatestFlow := getSingleGreatestPathsFlow(graph, shortestPaths)
 	log.Printf("Greatest possible flow: %v\n", greatestFlow)
+
+	// Part 2
+	greatestDuoFlow := getDuoGreatestPathsFlow(graph, shortestPaths)
+	log.Printf("Greatest possible duo flow: %v\n", greatestDuoFlow)
 
 	elapsed := time.Since(startTime)
 	log.Printf("Elapsed Time: %s\n", elapsed)
@@ -30,7 +34,7 @@ func getGraph(input string) (graph map[string]Node) {
 	graph = map[string]Node{}
 	nameExp, _ := regexp.Compile(`([A-Z]{2})`)
 	flowExp, _ := regexp.Compile(`(\d)+`)
-	for _, line := range strings.Split(input, "\r\n") {
+	for _, line := range strings.Split(input, "\n") {
 		nodeNames := nameExp.FindAllString(line, -1)
 		flowRateRes := flowExp.FindAllString(line, -1)
 		flowRate, _ := strconv.Atoi(flowRateRes[0])
@@ -114,12 +118,32 @@ func getRoute(visited map[string]string, origin, destination string) (path []str
 	return
 }
 
-func getGreatestPathsFlow(graph map[string]Node, paths map[string]int) int {
+func getSingleGreatestPathsFlow(graph map[string]Node, paths map[string]int) int {
 	releasable := getReleasableValves(graph)
 
-	greatestPathFlow := getGreatestPath(graph, paths, releasable, "AA", 30, 0)
+	beginningNode := "AA"
+	minutesRemaining := 30
+	greatestPathFlow, _ := getGreatestPath(graph, paths, releasable, beginningNode, minutesRemaining, 0)
 
 	return greatestPathFlow
+}
+
+func getDuoGreatestPathsFlow(graph map[string]Node, paths map[string]int) int {
+	releasable := getReleasableValves(graph)
+
+	// The data is structured in a way where the original path need not vary. This solution does not fit all similar problems.
+	beginningNode := "AA"
+	minutesRemaining := 26
+	greatestPathFlow, greatestPath := getGreatestPath(graph, paths, releasable, beginningNode, minutesRemaining, 0)
+
+	openedNodes := strings.Split(greatestPath, ",")[1:]
+	for _, val := range openedNodes {
+		releasable[val] = true
+	}
+
+	elephlow, _ := getGreatestPath(graph, paths, releasable, "AA", minutesRemaining, 0)
+
+	return greatestPathFlow + elephlow
 }
 
 func getGreatestPath(
@@ -128,13 +152,14 @@ func getGreatestPath(
 	targets map[string]bool,
 	current string,
 	ttl,
-	score int) int {
+	score int) (int, string) {
 
 	if ttl <= 0 {
-		return score
+		return score, ""
 	}
 
 	maxScore := 0
+	maxPath := ""
 	for key, val := range targets {
 		path := getPathName(current, key)
 		// time to travel, along with time to activate
@@ -144,15 +169,16 @@ func getGreatestPath(
 			copy[key] = true
 			newTtl := ttl - activationCost
 			newScore := newTtl * graph[key].FlowRate
-			resultScore := getGreatestPath(graph, paths, copy, key, newTtl, newScore)
+			resultScore, resultPath := getGreatestPath(graph, paths, copy, key, newTtl, newScore)
 
 			if resultScore > maxScore {
 				maxScore = resultScore
+				maxPath = resultPath
 			}
 		}
 	}
 
-	return score + maxScore
+	return score + maxScore, current + "," + maxPath
 }
 
 func getReleasableValves(graph map[string]Node) map[string]bool {

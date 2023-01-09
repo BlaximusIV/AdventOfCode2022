@@ -1,5 +1,5 @@
-# Day 17, Pyroclastic Flow
-## --- Day 17: Pyroclastic Flow ---
+# Day 17
+## --- Pyroclastic Flow ---
 Your handheld device has located an alternative exit from the cave for you and the elephants. The ground is rumbling almost continuously now, but the strange valves bought you some time. It's definitely getting warmer in here, though.
 
 The tunnels eventually open into a very tall, narrow chamber. Large, oddly-shaped rocks are falling into the chamber from above, presumably due to all the rumbling. If you can't work out where the rocks will fall next, you might be crushed!
@@ -331,3 +331,10 @@ The moment each of the next few rocks begins falling, you would see this:
 To prove to the elephants your simulation is accurate, they want to know how tall the tower will get after 2022 rocks have stopped (but before the 2023rd rock begins falling). In this example, the tower of rocks will be 3068 units tall.
 
 How many units tall will the tower of rocks be after 2022 rocks have stopped falling?
+
+## --- Part 2 ---
+The elephants are not impressed by your simulation. They demand to know how tall the tower will be after 1000000000000 rocks have stopped! Only then will they feel confident enough to proceed through the cave.
+
+In the example above, the tower would be 1514285714288 units tall!
+
+How tall will the tower be after 1000000000000 rocks have stopped?

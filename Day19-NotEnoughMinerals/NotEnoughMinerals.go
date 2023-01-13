@@ -22,13 +22,25 @@ func main() {
 	bluePrints := parseBluePrints(string(content))
 
 	// Part1
-	qualityLevels := getQualityLevels(bluePrints)
+	qualityLevels := getQualityLevels(bluePrints, 24)
 	sum := 0
 	for _, level := range qualityLevels {
 		sum += level
 	}
 
 	log.Printf("Quality level sum: %d\n", sum)
+
+	// Part2
+	// Needs optimization, or a different algorithm. Takes over an hour to complete.
+	// This can be refactored to just calculate, rather than iterate. Will save about 33% execution time.
+	// Make execution asynchronous
+	// Algorithm with prioritizing bots that allow building a geo bot every turn
+	product := 1
+	for _, bp := range bluePrints[:3] {
+		product *= getMaxGeodes(bp, 32, [4]int{1, 0, 0, 0}, [4]int{0, 0, 0, 0})
+	}
+
+	log.Printf("Product top geodes: %d", product)
 
 	elapsed := time.Since(startTime)
 	log.Printf("Elapsed Time: %s\n", elapsed)
@@ -56,11 +68,11 @@ func parseBluePrints(input string) []BluePrint {
 	return bluePrints
 }
 
-func getQualityLevels(bluePrints []BluePrint) (levels []int) {
+func getQualityLevels(bluePrints []BluePrint, ttl int) (levels []int) {
 	levels = []int{}
 
 	for _, bp := range bluePrints {
-		maxGeodes := getMaxGeodes(bp, 24, [4]int{1, 0, 0, 0}, [4]int{})
+		maxGeodes := getMaxGeodes(bp, ttl, [4]int{1, 0, 0, 0}, [4]int{})
 		levels = append(levels, bp.Id*maxGeodes)
 	}
 
@@ -121,7 +133,6 @@ func purchaseBot(bp BluePrint, bots, res *[4]int, botType int, ttl *int) {
 	switch botType {
 	case 0:
 		{
-			// TODO: calculate time, resources necessary
 			for res[0] < bp.OrebotCost[0] && *ttl > 1 {
 				addResources(bots, res, ttl)
 			}

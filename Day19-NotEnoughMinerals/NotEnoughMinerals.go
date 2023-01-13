@@ -33,7 +33,7 @@ func main() {
 	// Part2
 	// Needs optimization, or a different algorithm. Takes over an hour to complete.
 	// This can be refactored to just calculate, rather than iterate. Will save about 33% execution time.
-	// Make execution asynchronous
+	// Make execution parallel
 	// Algorithm with prioritizing bots that allow building a geo bot every turn
 	product := 1
 	for _, bp := range bluePrints[:3] {

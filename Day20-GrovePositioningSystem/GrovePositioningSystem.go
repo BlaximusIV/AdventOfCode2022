@@ -23,9 +23,18 @@ func main() {
 
 	// Part1
 	simulateMixing(ordering)
-	pos1, pos2, pos3 := findPosition(*ordering[origin.Id], 1000), findPosition(*ordering[origin.Id], 2000), findPosition(*ordering[origin.Id], 3000)
 
-	log.Printf("Grove coordinate sum: %d\n", pos1+pos2+pos3)
+	coordinates := getGroveCoordinates(ordering, origin.Id)
+	log.Printf("Grove coordinate sum: %d\n", coordinates)
+
+	// Part2
+	ordering, origin = makeNodes(numbers)
+
+	const DecryptKey = 811589153
+	simulateDecryptKeyMixing(ordering, DecryptKey)
+
+	coordinates = getGroveCoordinates(ordering, origin.Id)
+	log.Printf("Decrypt key grove coordinate sum: %d\n", coordinates)
 
 	elapsed := time.Since(startTime)
 	log.Printf("Elapsed Time: %s\n", elapsed)
@@ -89,7 +98,8 @@ func simulateMixing(ordering map[int]*Node) {
 
 		// Find where it goes
 		current := node
-		for i := node.Val; i != 0; increment(&i) {
+		iterations := node.Val % (len(ordering) - 1)
+		for i := iterations; i != 0; increment(&i) {
 			current = traverse(current, node.Val)
 		}
 
@@ -128,8 +138,8 @@ func traverse(n *Node, val int) *Node {
 	return n
 }
 
-func findPosition(origin Node, count int) int {
-	current := &origin
+func findPosition(origin *Node, count int) int {
+	current := origin
 	for i := 0; i < count; i++ {
 		current = current.Next
 	}
@@ -137,7 +147,24 @@ func findPosition(origin Node, count int) int {
 	return current.Val
 }
 
-// Used for debugging, unused code makes the compiler upset
+func simulateDecryptKeyMixing(ordering map[int]*Node, key int) {
+	for _, node := range ordering {
+		node.Val *= key
+	}
+
+	const RequiredMixCount = 10
+	for i := 0; i < RequiredMixCount; i++ {
+		simulateMixing(ordering)
+	}
+}
+
+func getGroveCoordinates(ordering map[int]*Node, id int) int {
+	pos1, pos2, pos3 := findPosition(ordering[id], 1000), findPosition(ordering[id], 2000), findPosition(ordering[id], 3000)
+
+	return pos1 + pos2 + pos3
+}
+
+// Used for debugging, unused code makes the linter upset
 // func reportNodes(origin Node, len int, forwards bool) {
 // 	node := &origin
 // 	nodes := ""

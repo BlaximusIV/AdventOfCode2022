@@ -24,8 +24,8 @@ func main() {
 	// Part1
 	simulateMixing(ordering)
 
-	coordinates := getGroveCoordinates(ordering, origin.Id)
-	log.Printf("Grove coordinate sum: %d\n", coordinates)
+	sum := getGroveCoordinateSum(ordering, origin.Id)
+	log.Printf("Grove coordinate sum: %d\n", sum)
 
 	// Part2
 	ordering, origin = makeNodes(numbers)
@@ -33,8 +33,8 @@ func main() {
 	const DecryptKey = 811589153
 	simulateDecryptKeyMixing(ordering, DecryptKey)
 
-	coordinates = getGroveCoordinates(ordering, origin.Id)
-	log.Printf("Decrypt key grove coordinate sum: %d\n", coordinates)
+	sum = getGroveCoordinateSum(ordering, origin.Id)
+	log.Printf("Decrypt key grove coordinate sum: %d\n", sum)
 
 	elapsed := time.Since(startTime)
 	log.Printf("Elapsed Time: %s\n", elapsed)
@@ -98,6 +98,7 @@ func simulateMixing(ordering map[int]*Node) {
 
 		// Find where it goes
 		current := node
+		// Modulo to minimize the number of traversals around the entire list
 		iterations := node.Val % (len(ordering) - 1)
 		for i := iterations; i != 0; increment(&i) {
 			current = traverse(current, node.Val)
@@ -158,7 +159,7 @@ func simulateDecryptKeyMixing(ordering map[int]*Node, key int) {
 	}
 }
 
-func getGroveCoordinates(ordering map[int]*Node, id int) int {
+func getGroveCoordinateSum(ordering map[int]*Node, id int) int {
 	pos1, pos2, pos3 := findPosition(ordering[id], 1000), findPosition(ordering[id], 2000), findPosition(ordering[id], 3000)
 
 	return pos1 + pos2 + pos3

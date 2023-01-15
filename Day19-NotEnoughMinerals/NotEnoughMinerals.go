@@ -180,8 +180,3 @@ func addResources(bots, res *[4]int, ttl *int) {
 	}
 	*ttl--
 }
-
-// func max(a, b int) int {
-// 	max := int(math.Max(float64(a), float64(b)))
-// 	return max
-// }

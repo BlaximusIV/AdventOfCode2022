@@ -42,6 +42,25 @@ func (m MonkeyMap) botMostCoordinate(y, x int) Coordinate {
 	return Coordinate{y, x}
 }
 
+// Hard-coding planes to input because a general solution isn't worth it to me right now
+func (m MonkeyMap) plane(c Coordinate) int {
+	if c.Y < 50 {
+		if c.X < 100 {
+			return 1
+		}
+		return 2
+	} else if c.Y < 100 {
+		return 3
+	} else if c.Y < 150 {
+		if c.X < 50 {
+			return 5
+		}
+		return 4
+	} else {
+		return 6
+	}
+}
+
 type Direction struct {
 	Magnitude     int
 	TurnDirection string

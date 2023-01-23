@@ -94,6 +94,11 @@ type Grid struct {
 	NorthMost, EastMost, SouthMost, WestMost int
 }
 
+func (g *Grid) Move(from, to Elf) {
+	g.Map.Move(from, to)
+	g.UpdateBounds(to)
+}
+
 func (g *Grid) MakeGrid(elves []Elf) {
 	m := Map{}
 	g.Elves = elves

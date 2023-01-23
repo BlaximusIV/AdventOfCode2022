@@ -20,9 +20,14 @@ func main() {
 	diffuseXTimes(&grid, 10)
 	fmt.Printf("Empty tiles after 10 rounds: %d\n", grid.CountEmptyTiles())
 
+	// Part 2
+	grid = Grid{}
+	grid.MakeGrid(elves)
+	diffusionCount := getDiffusionRoundCount(&grid)
+	fmt.Printf("Required rounds to full diffusion: %d\n", diffusionCount)
+
 	elapsed := time.Since(startTime)
 	fmt.Printf("Elapsed time: %v\n", elapsed)
-
 }
 
 func getElves(input string) []Elf {
@@ -37,16 +42,32 @@ func getElves(input string) []Elf {
 	return elves
 }
 
+func getDiffusionRoundCount(g *Grid) int {
+	roundCount := 1
+	direction := North
+	isDiffusing := true
+	for isDiffusing {
+		isDiffusing = diffuseElves(g, direction)
+
+		if isDiffusing {
+			roundCount++
+		}
+
+		direction = direction.Next()
+	}
+
+	return roundCount
+}
+
 func diffuseXTimes(g *Grid, times int) {
 	direction := North
 	for i := 0; i < 10; i++ {
 		diffuseElves(g, direction)
 		direction = direction.Next()
-		g.Print()
 	}
 }
 
-func diffuseElves(g *Grid, startDirection Direction) {
+func diffuseElves(g *Grid, startDirection Direction) (diffused bool) {
 	proposalMap := map[Elf]int{}
 
 	proposals := []Proposal{}
@@ -66,16 +87,17 @@ func diffuseElves(g *Grid, startDirection Direction) {
 	for _, p := range proposals {
 		// if unique location, move
 		if proposalMap[p.To] == 1 {
-			// Move elf, update list
-			g.Map.Move(p.From, p.To)
+			g.Move(p.From, p.To)
+
 			finalElves = append(finalElves, p.To)
-			g.UpdateBounds(p.To)
+			diffused = true
 		} else {
 			finalElves = append(finalElves, p.From)
 		}
 	}
 
 	g.Elves = finalElves
+	return
 }
 
 func findProposal(m Map, direction Direction, e Elf) Proposal {

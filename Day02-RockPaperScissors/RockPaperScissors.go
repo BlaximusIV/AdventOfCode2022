@@ -7,15 +7,17 @@ import (
 	"strings"
 )
 
-const TIE string = "TIE"
-const WIN string = "WIN"
-const LOSS string = "LOSS"
-const A string = "A"
-const B string = "B"
-const C string = "C"
-const X string = "X"
-const Y string = "Y"
-const Z string = "Z"
+const (
+	TIE  string = "TIE"
+	WIN  string = "WIN"
+	LOSS string = "LOSS"
+	A    string = "A"
+	B    string = "B"
+	C    string = "C"
+	X    string = "X"
+	Y    string = "Y"
+	Z    string = "Z"
+)
 
 var PlayScores = map[string]int{
 	X: 1,

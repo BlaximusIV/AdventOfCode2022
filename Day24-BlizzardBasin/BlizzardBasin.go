@@ -10,7 +10,7 @@ import (
 func main() {
 	startTime := time.Now()
 
-	input, _ := os.ReadFile("TestInput.txt")
+	input, _ := os.ReadFile("Input.txt")
 	blizzardMap := parseBlizzardMap(string(input))
 
 	// Part 1
@@ -70,22 +70,32 @@ func parseBlizzardMap(input string) Map {
 }
 
 func findQuickestRouteTime(m Map, start Coordinate, goal Coordinate, startTick int) int {
+	cycleLength := len(m.East) * len(m.North)
+	startState := State{start, startTick}
+	startPriority := PriorityItem{startTick + start.EuclidianDistance(goal), startState}
+
 	frontier := PriorityQueue{}
-	frontier.Enqueue(PriorityItem{startTick + start.EuclidianDistance(goal), State{start, Minute(startTick)}})
+	frontier.Enqueue(startPriority)
+	costSoFar := map[State]int{startState: startTick}
 
 	finalState := State{}
 	for len(frontier.Vals) > 0 {
 		current := frontier.Dequeue()
-		if current.Item.Coordinate == goal {
-			finalState = current.Item
+		if current.Coordinate == goal {
+			finalState = current
 			break
 		}
 
-		moves := m.GetMoves(current.Item.Coordinate, current.Item.Time, start, goal)
+		moves := m.GetMoves(current.Coordinate, current.Time, start, goal)
 		for _, c := range moves {
-			distance := c.Coordinate.EuclidianDistance(goal)
 
-			frontier.Enqueue(PriorityItem{int(c.Time) + distance, c})
+			currentCostState := State{c.Coordinate, c.Time % cycleLength}
+			_, exists := costSoFar[currentCostState]
+			if !exists || c.Time < costSoFar[currentCostState] {
+				distance := c.Coordinate.EuclidianDistance(goal)
+				costSoFar[currentCostState] = c.Time
+				frontier.Enqueue(PriorityItem{c.Time + distance, c})
+			}
 		}
 	}
 

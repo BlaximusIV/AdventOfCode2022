@@ -13,13 +13,18 @@ func main() {
 	input, _ := os.ReadFile("Input.txt")
 	blizzardMap := parseBlizzardMap(string(input))
 
-	// Part 1
 	start := Coordinate{0, 1}
 	height := len(blizzardMap.Coordinates) - 1
 	width := len(blizzardMap.Coordinates[height]) - 1
 	goal := Coordinate{height, width - 1}
+
+	// Part 1
 	routeMinutes := findQuickestRouteTime(blizzardMap, start, goal, 0)
 	fmt.Printf("Quickest route in minutes: %d\n", routeMinutes)
+
+	// Part 2
+	doubleBackMinutes := findQuickestDoubleBackTime(blizzardMap, start, goal, 0)
+	fmt.Printf("Quickest route after doubling back: %d\n", doubleBackMinutes)
 
 	elapsed := time.Since(startTime)
 	fmt.Printf("Elapsed time: %v\n", elapsed)
@@ -100,4 +105,12 @@ func findQuickestRouteTime(m Map, start Coordinate, goal Coordinate, startTick i
 	}
 
 	return int(finalState.Time)
+}
+
+func findQuickestDoubleBackTime(m Map, start Coordinate, goal Coordinate, startTick int) int {
+	toGoal := findQuickestRouteTime(m, start, goal, startTick)
+	toStart := findQuickestRouteTime(m, goal, start, toGoal)
+	toGoal = findQuickestRouteTime(m, start, goal, toStart)
+
+	return toGoal
 }
